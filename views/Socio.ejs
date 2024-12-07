@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMIIPLAYA</title>
+    <link rel="shortcut icon" href="/imagenes/logoAMII2.png" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.12/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="css/socio.css">
+    <script src="js/socios.js"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <section>
+        <nav class="navbar navbar-expand-lg fixed-top bg-light navbar-light px-3">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/" style="margin-left: 1%;">
+                    <img id="MDB-logo" src="/imagenes/logoAMII2.png" alt="MDB Logo" draggable="false" height="70" />
+                </a>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <ul class="navbar-nav align-items-center" style="margin-right: 1%;">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ingresos"><i class="bi bi-cash-coin"></i> Egresos/Ingresos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link mx-2" href="#!"><i class="fas fa-bell pe-2"></i>Alerts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link mx-2" href="#!"><i class="fas fa-heart pe-2"></i>Trips</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </section>
+    <button 
+    id="btnMostrarOcultar" 
+    class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center"
+    style="width: 60px; height: 60px; position: fixed; bottom: 20px; right: 20px; z-index: 1050;">
+    <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+</button>
+    <div id="successContainer" class="hidden"></div>
+    <div id="errorContainer" class="hidden"></div>
+    <div class="main-content" style="margin-top: 1%;">
+        <div style="display: flex; align-items: center; gap: 1%; margin-bottom: 2%;">
+            <button style="margin: 0; margin-left: 1%;" data-toggle="modal" data-target="#modalAgregarSocio" id="btnAgregarSocio">
+                Agregar Socio
+            </button>
+            <strong>filtrar por estado:</strong>
+            <select name="estado" id="estado" class="form-select" aria-label="Default select example">
+                <option value="todo">Todo</option>
+                <option value="pagado">Pagado</option>
+                <option value="pendiente">Pendiente</option>
+            </select>
+        </div>
+        
+        <div class="table-responsive elemento">
+            <table class="table table-striped mt-3 " id="tabSocios">
+                <thead style="background: rgba(7, 7, 190, 0.847); color: white;">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellido</th>
+                        <th scope="col">Fecha de nacimiento</th>
+                        <th scope="col">fecha de inscripción</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Sección</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="sociosBody">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+   <!-- Modal para agregar socio -->
+<div class="modal fade" id="modalAgregarSocio" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Socio</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formSocio">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id"><strong>ID</strong></label>
+                                <input type="text" class="form-control" id="id" placeholder="ID" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre"><strong>Nombre</strong></label>
+                                <input type="text" class="form-control" id="nombre" placeholder="Nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="apellido"><strong>Apellido</strong></label>
+                                <input type="text" class="form-control" id="apellido" placeholder="Apellido">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaNacimiento"><strong>Fecha de Nacimiento</strong></label>
+                                <input type="date" class="form-control" id="fechaNacimiento">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fechaInscripcion"><strong>Fecha de Inscripción</strong></label>
+                                <input type="date" class="form-control" id="fechaInscripcion">
+                            </div>
+                            <div class="form-group">
+                                <label for="email"><strong>Email</strong></label>
+                                <input type="email" class="form-control" id="email" placeholder="Correo electrónico">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono"><strong>Teléfono</strong></label>
+                                <input type="tel" class="form-control" id="telefono" placeholder="Teléfono">
+                            </div>
+                            <div class="form-group">
+                                <label for="seccion"><strong>Sección</strong></label>
+                                <select class="form-control" id="seccion">
+                                    <option value="AMIIPLAYA">AMII Playa</option>
+                                    <option value="2">Sección 2</option>
+                                    <option value="3">Sección 3</option>
+                                    <option value="4">Sección 4</option>
+                                    <option value="5">Sección 5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group text-right mt-3">
+                        <button type="submit" class="btn btn-primary px-4" id="btnAgregar">Agregar</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCerrarModal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+</body>
+
+</html>

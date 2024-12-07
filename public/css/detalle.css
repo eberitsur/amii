@@ -1,0 +1,90 @@
+.navbar-light .navbar-nav .nav-link {
+    color: #000;
+}
+
+/* Inicialmente ocultar el nav */
+.navbar-hidden {
+    transform: translateY(-100%); /* Oculta el navbar fuera de la pantalla */
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+/* Mostrar el nav cuando se quita la clase */
+.navbar-visible {
+    transform: translateY(0); /* Muestra el navbar */
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.main-content {
+    padding-top: 100px;
+    /* Ajusta a la altura del navbar */
+}
+
+.hidden {
+    display: none;
+}
+
+#errorContainer {
+    color: red;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    position: relative;
+    animation: fadeOut 1s ease-out forwards;
+    animation-delay: 4s;
+    /* Comienza después de 4 segundos */
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.contenedor-filas {
+    display: flex;
+    flex-wrap: wrap;
+    /* Permite que los elementos pasen a la siguiente fila si hay muchos */
+    gap: 15px;
+    /* Añade espacio entre los elementos */
+    margin: 20px;
+    /* Margen externo del contenedor */
+}
+
+.elemento {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    min-width: 100px;
+    /* Ancho mínimo de cada elemento */
+}
+body{
+    background-color: #f0f0f0 !important;
+}
+#btnMostrarOcultar {
+    transition: margin-top 0.3s ease-in-out;
+}
+#contenidoPrincipal {
+    transition: margin-top 0.2s ease-in-out;
+}
+#btnMostrarOcultar:hover {
+    transform: scale(1.1); /* Agranda un poco el botón al pasar el mouse */
+    background-color: #0056b3; /* Cambia ligeramente el color */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}

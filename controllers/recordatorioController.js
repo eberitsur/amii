@@ -6,6 +6,8 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const e = require('express');
 const cron = require('node-cron');
+require('dotenv').config();
+
 function calcularDiferenciaMeses(fecha) {
     const ahora = new Date();
     const fechaVencimiento = new Date(fecha);
@@ -16,8 +18,9 @@ function calcularDiferenciaMeses(fecha) {
 
     return diferenciaMeses;
 }
-// Función para buscar inscripciones que necesiten un recordatorio
-function buscarInscripcionesParaRecordatorio() {
+
+// Función para buscar inscripciones que necesiten un recordatorio o actualización de estado
+function buscarInscripcionesParaRecordatorioYActualizacion() {
     const query = `
       SELECT 
         i.id AS inscripcionId,
@@ -29,7 +32,6 @@ function buscarInscripcionesParaRecordatorio() {
         s.email
       FROM inscripcion i
       JOIN socios s ON i.socioId = s.id
-      WHERE i.estado = 'pagado'
     `;
 
     db.query(query, (err, resultados) => {
@@ -38,18 +40,37 @@ function buscarInscripcionesParaRecordatorio() {
         resultados.forEach((registro) => {
             const mesesFaltantes = calcularDiferenciaMeses(registro.fechaVencimiento);
 
-            // Verificamos si faltan 3, 2 o 1 meses para la fecha de vencimiento
-            if ([3, 2, 1].includes(mesesFaltantes)) {
+            if (registro.fechaVencimiento < new Date().toISOString().split('T')[0]) {
+                // Si la fecha de vencimiento ya pasó, actualizar estado a "no inscrito"
+                actualizarEstadoNoInscrito(registro.inscripcionId);
+            } else if ([3, 2, 1].includes(mesesFaltantes) && registro.estado === 'inscrito') {
+                // Si faltan 3, 2 o 1 meses para la fecha de vencimiento, enviar recordatorio
                 console.log(
-                    `Socio: ${registro.nombre} ${registro.apelllidos}, Email: ${registro.correo}, Faltan ${mesesFaltantes} meses.`
+                    `Socio: ${registro.nombre} ${registro.apelllidos}, Email: ${registro.email}, Faltan ${mesesFaltantes} meses.`
                 );
-
-                // Enviar recordatorio si no se ha enviado este mes
                 enviarRecordatorio(registro, mesesFaltantes);
             }
         });
     });
 }
+
+// Función para actualizar el estado a "no inscrito"
+function actualizarEstadoNoInscrito(inscripcionId) {
+    const queryActualizar = `
+      UPDATE inscripcion 
+      SET estado = 'no inscrito'
+      WHERE id = ?
+    `;
+
+    db.query(queryActualizar, [inscripcionId], (err) => {
+        if (err) {
+            console.error('Error al actualizar estado a "no inscrito":', err);
+        } else {
+            console.log(`Estado de la inscripción ${inscripcionId} actualizado a "no inscrito".`);
+        }
+    });
+}
+
 // Función para enviar el recordatorio
 function enviarRecordatorio(registro, mesesFaltantes) {
     const ahora = new Date();
@@ -68,16 +89,14 @@ function enviarRecordatorio(registro, mesesFaltantes) {
             if (err) throw err;
 
             if (resultados.length === 0) {
-                // Si no existe un recordatorio, enviarlo
                 console.log(
                     `Enviando recordatorio al socio ${registro.nombre} ${registro.apelllidos}.`
                 );
 
-                // Registrar el recordatorio en la base de datos
                 const queryInsertar = `
-            INSERT INTO recordatorios (socioId, inscripcionId, mes, anio)
-            VALUES (?, ?, ?, ?)
-          `;
+                  INSERT INTO recordatorios (socioId, inscripcionId, mes, anio)
+                  VALUES (?, ?, ?, ?)
+                `;
                 db.query(
                     queryInsertar,
                     [registro.socioId, registro.inscripcionId, mesActual, anioActual],
@@ -87,9 +106,8 @@ function enviarRecordatorio(registro, mesesFaltantes) {
                     }
                 );
 
-                // Opcional: Enviar correo con nodemailer
-                if (registro.correo) {
-                    enviarCorreo(recordio.nombre, registro.apelllidos, registro.correo, mesesFaltantes);
+                if (registro.email) {
+                    enviarCorreo(registro.nombre, registro.apelllidos, registro.email, mesesFaltantes);
                 }
             } else {
                 console.log(
@@ -99,18 +117,19 @@ function enviarRecordatorio(registro, mesesFaltantes) {
         }
     );
 }
+
 // Opcional: Enviar correo con nodemailer
 function enviarCorreo(nombre, apellidos, correo, mesesFaltantes) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'tu_correo@gmail.com',
-            pass: 'tu_contraseña'
+            user: process.env.CORREO,
+            pass: process.env.PASS_CORREO
         }
     });
 
     const mailOptions = {
-        from: 'tu_correo@gmail.com',
+        from: process.env.CORREO,
         to: correo,
         subject: 'Recordatorio de reinscripción',
         text: `Hola ${nombre} ${apellidos}, faltan ${mesesFaltantes} meses para tu reinscripción. ¡No olvides hacerlo a tiempo!`
@@ -121,23 +140,24 @@ function enviarCorreo(nombre, apellidos, correo, mesesFaltantes) {
         else console.log(`Correo enviado: ${info.response}`);
     });
 }
+
 const registrarEjecucionCron = () => {
     const fechaActual = new Date();
     const query = 'INSERT INTO ejecuciones_cron (fecha) VALUES (?)';
-  
+
     db.query(query, [fechaActual], (err) => {
-      if (err) console.error('Error registrando la ejecución del cron:', err);
-      else console.log('Ejecución del cron registrada en la base de datos.');
+        if (err) console.error('Error registrando la ejecución del cron:', err);
+        else console.log('Ejecución del cron registrada en la base de datos.');
     });
-  };
+};
 
 // Ejecuta el script el día 1 de cada mes
 function configurarCron() {
-    cron.schedule('0 16 * * *', () => { // Configurado para el primer día de cada mes
+    cron.schedule('0 16 * * *', () => {
         console.log(`[${new Date().toISOString()}] - Cron ejecutado correctamente.`);
-        // Aquí va tu lógica, por ejemplo:
-        buscarInscripcionesParaRecordatorio();
+        buscarInscripcionesParaRecordatorioYActualizacion();
         registrarEjecucionCron();
     });
 }
+
 module.exports = { configurarCron };

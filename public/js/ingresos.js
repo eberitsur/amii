@@ -5,8 +5,9 @@ var egresos = [];
 var ctx;
 var idEditar;
 let chart; // Variable global para almacenar el gráfico
-
+// cuando se abre la pagina se ejecuta este al cliente
 document.addEventListener('DOMContentLoaded', function () {
+    // ajusta la página para las pantallas de celulares
     if ($(window).width() < 768) {
         // Ajustes adicionales para pantallas pequeñas
         $('.nav-link').addClass('text-center');
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const navbar = document.querySelector('.navbar');
     successContainer = document.getElementById('successContainer');
     errorContainer = document.getElementById('errorContainer');
+    // evento de submit para editr cambios en la tabla de egresos
     $('#formEgresoEditar').on('submit', function (event) {
         event.preventDefault();
         $('#btnCerrarModalEditarEgreso').click();
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const total = $('#totalEgresoEditar').val();
         const formaPago = $('#formaPagoEgresoEditar').val();
         const referencia = $('#referenciaEgresoEditar').val();
+        // fetch para hacer la peticion del servidor para editar la tabla egresos
         fetch('/ingresos/editarEgreso', {
             method: 'POST',
             headers: {
@@ -65,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showError(errorContainer, 'No se pudo editar el egreso.');
             });
     });
+    // evento submit para editar la tabla de ingresos
     $('#formIngresoEditar').on('submit', function (event) {
         event.preventDefault();
         $('#btnCerrarModalEditarIngreso').click();
@@ -77,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const total = $('#totalIngresoEditar').val();
         const formaPago = $('#formaPagoIngresoEditar').val();
         const referencia = $('#referenciaIngresoEditar').val();
+        // peticion fetch a servidor para guardar los cambios a la tabla de ingresos
         fetch('/ingresos/editarIngreso', {
             method: 'POST',
             headers: {
@@ -116,15 +121,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 showError(errorContainer, 'No se pudo editar el ingreso.');
             });
     });
+    // boton filtrar para hacer las estadisticas del cliente
     $('#filtrar').on('click', function () {
         llenarDatos();
     });
+    // agrega al navbar la clase navbar-hidden para ocultarlo
     navbar.classList.add('navbar-hidden');
-    // Mostrar/ocultar el navbar basado en la posición del mouse
+    // Mostrar/ocultar el navbar al dar click en el boton
     const btnMostrarOcultar = document.getElementById('btnMostrarOcultar');
-
-    navbar.classList.add('navbar-hidden');
+    // evento click para el boton para ocultar o mostrar el navbar
     $('#btnMostrarOcultar').on('click', function () {
+        // si contiene la clase navbar-hidden, la remueve y le agrega la clase navbar-visible si no hace lo contrario
         if (navbar.classList.contains('navbar-hidden')) {
             navbar.classList.remove('navbar-hidden');
             navbar.classList.add('navbar-visible');
@@ -136,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     llenarDatos();
-
+    // evento submit para agregar el ingreso
     $('#formIngresoAgregar').on('submit', function (event) {
         event.preventDefault();
         $('#btnCerrarModalAgregaringreso').click();
@@ -150,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const total = $('#totalIngreso').val();
         const formaPago = $('#formaPagoIngreso').val();
         const referencia = $('#referenciaIngreso').val();
+        //peticion al servidor para agregar el ingreso
         fetch('/ingresos/agregarIngreso', {
             method: 'POST',
             headers: {
@@ -187,7 +195,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 showError(errorContainer, 'No se pudo agregar el ingreso.');
             });
     });
+    // oculta la tabla para estadistica por año
     $('#estadisticas2').addClass('hidden');
+    // evento change para que el cliente elija el tipo de estadisticas que busca
     document.getElementById('filtorEstadisticas').addEventListener('change', function () {
         // Mostrar el filtro adecuado
         const valor = this.value;
@@ -251,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#hasta').val(null);
         }
     });
+    // evento submit para agregar egresos a la bd
     $('#formEgreso').on('submit', function (event) {
         event.preventDefault();
         $('#btnCerrarModalAgregarEgreso').click();
@@ -265,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const formaPago = $('#formaPagoEgreso').val();
         const referencia = $('#referenciaEgreso').val();
 
-
+        // solicitud al servidor para guardar el egreso
         fetch('/ingresos/agregarEgreso', {
             method: 'POST',
             headers: {
@@ -311,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
 //---------------------------empiezan funciones----------------------------------------------------------
 
 
-// Función para mostrar un gráfico vacío en caso de error o datos inválidos
+// Función para mostrar un gráfico con las estadisticas
 function generarGrafico(datos, etiquetas, tipo) {
     if (chart) {
         chart.destroy(); // Destruir el gráfico anterior si existe
@@ -366,7 +377,7 @@ function generarGrafico(datos, etiquetas, tipo) {
     });
 }
 
-
+// estas funciones sirven para mostrar los graficos en caso de error
 function mostrarErrorEstadisticasMes() {
     const etiquetas = ['ingresos', 'egresos'];
     const datos = Array(12).fill(0);
@@ -390,8 +401,9 @@ function mostrarErrorEstadisticasGeneral() {
     generarGrafico(datos, etiquetas, 'pie'); // Gráfico vacío
 }
 
-
+// tabla para llenar la tabla de ingresos
 function llenarIngresos() {
+    // peticion al servidor para que nos devuelva los datos de la tabla ingresos
     fetch('/ingresos/getIngresos')
         .then(response => {
             if (!response.ok) {
@@ -472,8 +484,9 @@ function llenarIngresos() {
             errorContainer.text('No se pudo obtener la lista de ingresos.');
         });
 }
-
+// función para llenar la tabla de egresos
 function llenarEgresos() {
+    // peticion al servidor para obtener los datos de la tabla egresos
     fetch('/ingresos/getEgresos')
         .then(response => {
             if (!response.ok) {
@@ -555,7 +568,7 @@ function llenarEgresos() {
             alert('No se pudo obtener la lista de egresos. Intente nuevamente más tarde.');
         });
 }
-
+// funcion para eliminar un registro de la tabla de ingresos
 window.eliminarIngreso = function (id) {
     if (confirm('¿Estás seguro de que deseas eliminar este ingreso?')) {
         fetch('/ingresos/eliminarIngreso', {
@@ -585,6 +598,7 @@ window.eliminarIngreso = function (id) {
             });
     }
 };
+// elimina un registro de la tabla de egresos despues de que el usuario confirme
 window.eliminarEgreso = function (id) {
     if (confirm('¿Estás seguro de que deseas eliminar este egreso?')) {
         fetch('/ingresos/eliminarEgreso', {
@@ -614,6 +628,7 @@ window.eliminarEgreso = function (id) {
             });
     }
 }
+// llena los datos de las estadisticas dependiendo de la opcion elegida por el usuario
 function llenarDatos() {
     const filtro = $('#filtorEstadisticas').val();
     $('#estadisticasBody').empty();
@@ -622,7 +637,7 @@ function llenarDatos() {
     if (filtro === 'Mes') {
         const mes = parseInt($('#mes').val(), 10); // Asegura un parseo base 10
         const anio = parseInt($('#ano').val(), 10); // Asegura un parseo base 10
-        
+
         // Validación básica en el cliente
         fetch('/ingresos/estadisticaMes', {
             method: 'POST',
@@ -637,33 +652,34 @@ function llenarDatos() {
             })
             .then(data => {
                 console.log('Estadísticas obtenidas (Mes):', data);
-        
+
                 // Validar estructura de los datos
                 if (!data || !Array.isArray(data) || data.length === 0) {
                     $('#estadisticasBody').append('<tr><td colspan="2">No hay datos disponibles</td></tr>');
                     mostrarErrorEstadisticasMes();
+                    $('#totalBodyE1').append('<tr><td colspan="1">No hay datos disponibles</td></tr>');
                     console.warn('Datos inválidos o vacíos recibidos del servidor.');
                     return;
                 }
-        
+
                 const etiquetas = data.map(item => `${item.tipo || 'Desconocido'} - ${formatearFecha(mes)}`);
                 const ingresos = data.find(item => item.tipo === 'ingresos') || { total_mes: 0 };
                 const egresos = data.find(item => item.tipo === 'egresos') || { total_mes: 0 };
-        
+
                 const datos = [
                     parseFloat(ingresos.total_mes) || 0,
                     parseFloat(egresos.total_mes) || 0,
                 ];
-        
+
                 // Limpia el contenido existente en los contenedores
                 $('#estadisticasBody').empty();
                 $('#totalBodyE1').empty();
-        
+
                 // Crear filas de la tabla con los datos obtenidos
                 data.forEach(item => {
                     const tipo = item.tipo || 'Desconocido';
                     const totalMes = formatoNumero(item.total_mes || 0);
-        
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="celda-tipo">${tipo}</td>
@@ -671,26 +687,26 @@ function llenarDatos() {
                     `;
                     $('#estadisticasBody').append(tr);
                 });
-        
+
                 // Calcular el balance total
                 const totalM = datos[0] - datos[1]; // ingresos.total_mes - egresos.total_mes
                 const color =
                     totalM > 0 ? 'rgb(144, 238, 144)' :
-                    totalM === 0 ? 'yellow' : 'red';
-        
+                        totalM === 0 ? 'yellow' : 'red';
+
                 $('#totalBodyE1').append(`
                     <tr>
                         <td style="background-color: ${color}; font-weight: bold;">${formatoNumero(totalM)}</td>
                     </tr>
                 `);
-        
+
                 // Generar gráfico de barras para datos mensuales
                 generarGrafico(datos, etiquetas, 'bar');
             })
             .catch(error => {
                 console.error('Error al obtener estadísticas (Mes):', error);
             });
-        
+
 
     } else if (filtro === 'Año') {
         const ano = $('#anoN').val(); // Obtener el año desde un campo de entrada
@@ -752,6 +768,7 @@ function llenarDatos() {
                         $('#estadisticas2Body').append('<tr><td colspan="14">No hay datos disponibles</td></tr>');
                         mostrarErrorEstadisticasAno();
                         cont = 0;
+                        $('#totalBodyE1').append('<tr><td colspan="1">No hay datos disponibles</td></tr>');
                         return
 
                     }
@@ -791,6 +808,7 @@ function llenarDatos() {
                     const ingresos = data.find(item => item.tipo === 'ingresos');
                     const egresos = data.find(item => item.tipo === 'egresos');
                     var totalM;
+                    var cont = 0;
                     // Datos para la tabla
                     data.forEach(item => {
                         const tr = document.createElement('tr');
@@ -799,8 +817,17 @@ function llenarDatos() {
                     <td style="background:rgba(228,228,228,255);">${formatoNumero(item.total_general || 0)}</td>
                 `;
                         $('#estadisticasBody').append(tr);
-
+                        if (item.total_general == null) {
+                            cont++;
+                        }                        
                     });
+                 
+                    if (cont == 2) {
+                        console.warn('No se encontraron datos válidos.');
+                        $('#totalBodyE1').append('<tr><td colspan="1">No hay datos disponibles</td></tr>');
+                        mostrarErrorEstadisticasGeneral();
+                        return
+                    }
                     totalM = parseInt(ingresos.total_general) - parseInt(egresos.total_general);
                     if (totalM > 0) {
                         $('#totalBodyE1').append(`<tr><td style="background-color: rgb(144, 238, 144) !important; font-weight: bold !important;">${formatoNumero(totalM)}</td></tr>`);
@@ -824,6 +851,7 @@ function llenarDatos() {
                 } else {
                     console.warn('No se encontraron datos válidos.');
                     $('#estadisticasBody').append('<tr><td colspan="2">No hay datos disponibles</td></tr>');
+                    $('#totalBodyE1').append('<tr><td colspan="1">No hay datos disponibles</td></tr>');
                     mostrarErrorEstadisticasGeneral();
                 }
             })
@@ -893,6 +921,7 @@ function llenarDatos() {
                         $('#totalBodyE1').append(`<tr><td style="background-color: yellow !important; font-weight: bold !important;">${formatoNumero(0)}</td></tr>`);
                         $('#estadisticas3Header').append(`<th scope="col">total</th>`);
                         $('#estadisticas3Body').append('<tr><td colspan="12">No hay datos disponibles</td></tr>');
+                        $('#totalBodyE1').append('<tr><td colspan="1">No hay datos disponibles</td></tr>');
                         mostrarErrorEstadisticasDecada()
                         return
                     }
@@ -935,6 +964,7 @@ function llenarDatos() {
     }
 
 }
+// funcion para mostrar mensaje de exito
 function showAlert(container, message, alertClass) {
     container.textContent = message;
     container.className = `alert ${alertClass}`;
@@ -943,7 +973,7 @@ function showAlert(container, message, alertClass) {
         container.classList.add('hidden');
     }, 5000);
 }
-
+// funcion para mostrar mensaje de error
 function showError(container, message) {
     container.textContent = message;
     container.className = `alert alert-danger`;
@@ -952,6 +982,7 @@ function showError(container, message) {
         container.classList.add('hidden');
     }, 5000);
 }
+// funcion que devuelve el mes 
 function formatearFecha(Mes) {
     const meses = [
         'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -960,6 +991,7 @@ function formatearFecha(Mes) {
     const mes = meses[Mes - 1];
     return ` ${mes}`;
 }
+// genera un grafico especial para las estadisticas por año y por decada
 function generarGrafico2(datos, etiquetas, tipo) {
     if (chart) {
         chart.destroy();
@@ -997,6 +1029,7 @@ function generarGrafico2(datos, etiquetas, tipo) {
         },
     });
 }
+// calcula el total de las estadisticas por año y por decada
 function calcularTotal(item, d) {
     if (d) {
         return item.a1 + item.a2 + item.a3 + item.a4 + item.a5 + item.a6 + item.a7 + item.a8 + item.a9 + item.a10;
@@ -1004,6 +1037,7 @@ function calcularTotal(item, d) {
         return item.enero + item.febrero + item.marzo + item.abril + item.mayo + item.junio + item.julio + item.agosto + item.septiembre + item.octubre + item.noviembre + item.diciembre;
     }
 }
+// funcion que formatea los numeros para que se vea con simbolo $ y separados los miles por comas y los decimales por puntos
 function formatoNumero(numero) {
     let formato = numero.toLocaleString('en-US', {
         style: 'currency',

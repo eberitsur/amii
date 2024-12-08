@@ -32,18 +32,20 @@ function buscarInscripcionesParaRecordatorioYActualizacion() {
         s.email
       FROM inscripcion i
       JOIN socios s ON i.socioId = s.id
+      where i.estado='inscrito'
     `;
 
     db.query(query, (err, resultados) => {
         if (err) throw err;
-
         resultados.forEach((registro) => {
             const mesesFaltantes = calcularDiferenciaMeses(registro.fechaVencimiento);
 
-            if (registro.fechaVencimiento < new Date().toISOString().split('T')[0]) {
+            if (new Date(registro.fechaVencimiento) < new Date()) {
                 // Si la fecha de vencimiento ya pasó, actualizar estado a "no inscrito"
+                console.log('entra en actualizar')
                 actualizarEstadoNoInscrito(registro.inscripcionId);
             } else if ([3, 2, 1].includes(mesesFaltantes) && registro.estado === 'inscrito') {
+                console.log('entra en mandar email')
                 // Si faltan 3, 2 o 1 meses para la fecha de vencimiento, enviar recordatorio
                 console.log(
                     `Socio: ${registro.nombre} ${registro.apelllidos}, Email: ${registro.email}, Faltan ${mesesFaltantes} meses.`
@@ -140,7 +142,7 @@ function enviarCorreo(nombre, apellidos, correo, mesesFaltantes) {
         else console.log(`Correo enviado: ${info.response}`);
     });
 }
-
+// se guarda las ejecuciones en la bd
 const registrarEjecucionCron = () => {
     const fechaActual = new Date();
     const query = 'INSERT INTO ejecuciones_cron (fecha) VALUES (?)';
@@ -151,10 +153,10 @@ const registrarEjecucionCron = () => {
     });
 };
 
-// Ejecuta el script el día 1 de cada mes
+// Ejecuta el script una vez al dia a las 4:00 pm
 function configurarCron() {
     cron.schedule('0 16 * * *', () => {
-        console.log(`[${new Date().toISOString()}] - Cron ejecutado correctamente.`);
+        console.log(`[${new Date().toISOString()}] - Cron ejecutado correctamente. recordatorio`);
         buscarInscripcionesParaRecordatorioYActualizacion();
         registrarEjecucionCron();
     });

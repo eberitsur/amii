@@ -2,14 +2,14 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const cron = require('node-cron'); // Asegúrate de importar correctamente node-cron
 require('dotenv').config();
-
+// hace un respaldo todos los domingos a las 8:00 pm 
 function configurarRespaldoBD() {
-    cron.schedule('0 20 * * 0', () => { // Domingo a las 20:00 horas
+    cron.schedule('18 17 * * 0', () => { // Domingo a las 20:00 horas
         console.log(`[${new Date().toISOString()}] - Iniciando respaldo de la base de datos...`);
 
         // Nombre del archivo de respaldo
         const fecha = new Date().toISOString().split('T')[0];
-        const respaldoArchivo = `baseDeDatos/respaldo_${fecha}.sql`;
+        const respaldoArchivo = `baseDeDatos/respaldoAmii_${fecha}.sql`;
 
         // Eliminar el respaldo anterior
         fs.readdir('baseDeDatos', (err, files) => {
@@ -41,7 +41,7 @@ function configurarRespaldoBD() {
         });
     });
 }
-
+// hace el respaldo del sistema actualizandolo en github
 function sincronizarRepositorioGit() {
     console.log(`[${new Date().toISOString()}] - Sincronizando repositorio Git...`);
 
@@ -54,7 +54,7 @@ function sincronizarRepositorioGit() {
     // Ejecutar los comandos de Git en serie
     ejecutarComandosGit(comandosGit);
 }
-
+// funcion para ejecutr los comandos de git
 function ejecutarComandosGit(comandos) {
     if (comandos.length === 0) return;
 
@@ -71,5 +71,4 @@ function ejecutarComandosGit(comandos) {
         ejecutarComandosGit(comandos);
     });
 }
-
 module.exports = { configurarRespaldoBD };

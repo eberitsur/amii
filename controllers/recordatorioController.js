@@ -145,9 +145,9 @@ function enviarCorreo(nombre, apellidos, correo, mesesFaltantes) {
 // se guarda las ejecuciones en la bd
 const registrarEjecucionCron = () => {
     const fechaActual = new Date();
-    const query = 'INSERT INTO ejecuciones_cron (fecha) VALUES (?)';
+    const query = 'INSERT INTO ejecuciones_cron (fecha, modulo) VALUES (?,?)';
 
-    db.query(query, [fechaActual], (err) => {
+    db.query(query, [fechaActual,'Recordatorio'], (err) => {
         if (err) console.error('Error registrando la ejecución del cron:', err);
         else console.log('Ejecución del cron registrada en la base de datos.');
     });
@@ -161,5 +161,4 @@ function configurarCron() {
         registrarEjecucionCron();
     });
 }
-
 module.exports = { configurarCron };

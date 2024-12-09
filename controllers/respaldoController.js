@@ -2,11 +2,12 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const cron = require('node-cron'); // Asegúrate de importar correctamente node-cron
 require('dotenv').config();
+const db = require('../config/db');
 // hace un respaldo todos los domingos a las 8:00 pm 
 function configurarRespaldoBD() {
-    cron.schedule('18 17 * * 0', () => { // Domingo a las 20:00 horas
+    cron.schedule('0 20 * * 0', () => { // Domingo a las 20:00 horas
         console.log(`[${new Date().toISOString()}] - Iniciando respaldo de la base de datos...`);
-
+        registrarEjecucionCron();
         // Nombre del archivo de respaldo
         const fecha = new Date().toISOString().split('T')[0];
         const respaldoArchivo = `baseDeDatos/respaldoAmii_${fecha}.sql`;
@@ -71,4 +72,13 @@ function ejecutarComandosGit(comandos) {
         ejecutarComandosGit(comandos);
     });
 }
+const registrarEjecucionCron = () => {
+    const fechaActual = new Date();
+    const query = 'INSERT INTO ejecuciones_cron (fecha, modulo) VALUES (?,?)';
+
+    db.query(query, [fechaActual,'Respaldo'], (err) => {
+        if (err) console.error('Error registrando la ejecución del cron:', err);
+        else console.log('Ejecución del cron registrada en la base de datos.');
+    });
+};
 module.exports = { configurarRespaldoBD };
